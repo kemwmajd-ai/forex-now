@@ -29,6 +29,9 @@ export const metadata: Metadata = {
     title: "فوركس الآن | Forex Now",
     description: "شركة وساطة مالية — افتح حساب تداول الآن.",
     type: "website",
+    url: "https://fxnow.pro",
+    siteName: "فوركس الآن | Forex Now",
+    locale: "ar_AR",
   },
 };
 
