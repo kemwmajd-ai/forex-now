@@ -6,6 +6,7 @@ import Link from "next/link";
 interface FormState {
   fullName: string;
   phone: string;
+  depositMethod: string;
   termsAccepted: boolean;
 }
 
@@ -143,10 +144,18 @@ function UsdtIcon() {
   );
 }
 
+/** طرق الإيداع المتاحة للاختيار */
+const DEPOSIT_METHODS = [
+  { id: "sham-cash", label: "شام كاش", icon: <ShamCashLogo /> },
+  { id: "exchange", label: "مراكز الصرافة والحوالات", icon: <ExchangeIcon /> },
+  { id: "usdt", label: "USDT", icon: <UsdtIcon /> },
+];
+
 export default function OpenAccountForm() {
   const [form, setForm] = useState<FormState>({
     fullName: "",
     phone: "",
+    depositMethod: "",
     termsAccepted: false,
   });
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -187,6 +196,7 @@ export default function OpenAccountForm() {
     else if (!/^[+\d\s()-]{7,20}$/.test(form.phone.trim()))
       errors.phone = "أدخل رقم هاتف صحيح.";
     if (!idCardRef.current?.files?.[0]) errors.idCard = "صورة الهوية مطلوبة.";
+    if (!form.depositMethod) errors.depositMethod = "يرجى اختيار طريقة الإيداع.";
     if (!form.termsAccepted) errors.terms = "يجب الموافقة على الشروط والأحكام.";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -199,9 +209,12 @@ export default function OpenAccountForm() {
     setStatus("loading");
     setErrorMsg("");
 
+    const selectedMethod = DEPOSIT_METHODS.find((m) => m.id === form.depositMethod);
+
     const fd = new FormData();
     fd.append("fullName", form.fullName.trim());
     fd.append("phone", form.phone.trim());
+    fd.append("depositMethod", selectedMethod ? selectedMethod.label : "");
     const idCard = idCardRef.current?.files?.[0];
     if (idCard) fd.append("idCard", idCard);
 
@@ -312,39 +325,59 @@ export default function OpenAccountForm() {
         <p className="-mt-4 text-xs text-red-600">{fieldErrors.idCard}</p>
       )}
 
-      {/* طرق الإيداع والسحب المتاحة */}
+      {/* اختيار طريقة الإيداع */}
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
         <h3 className="mb-1 text-sm font-bold text-brand-navy">
-          طرق الإيداع والسحب المتاحة
+          طريقة الإيداع المفضّلة <span className="text-red-500">*</span>
         </h3>
         <p className="mb-4 text-xs text-slate-500">
-          يمكنك الإيداع والسحب بسهولة عبر إحدى الوسائل التالية:
+          اختر الوسيلة التي تفضّل الإيداع والسحب من خلالها:
         </p>
         <div className="grid grid-cols-3 gap-3">
-          {/* شام كاش */}
-          <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center">
-            <div className="flex h-12 items-center justify-center">
-              <ShamCashLogo />
-            </div>
-            <span className="text-xs font-bold text-slate-700">شام كاش</span>
-          </div>
-          {/* مراكز الصرافة والحوالات */}
-          <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center">
-            <div className="flex h-12 items-center justify-center">
-              <ExchangeIcon />
-            </div>
-            <span className="text-xs font-bold leading-tight text-slate-700">
-              مراكز الصرافة والحوالات
-            </span>
-          </div>
-          {/* USDT */}
-          <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center">
-            <div className="flex h-12 items-center justify-center">
-              <UsdtIcon />
-            </div>
-            <span className="text-xs font-bold text-slate-700">USDT</span>
-          </div>
+          {DEPOSIT_METHODS.map((m) => {
+            const selected = form.depositMethod === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => {
+                  setForm((p) => ({ ...p, depositMethod: m.id }));
+                  setFieldErrors((prev) => ({ ...prev, depositMethod: "" }));
+                }}
+                aria-pressed={selected}
+                className={`relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition ${
+                  selected
+                    ? "border-brand-orange bg-brand-orange/5 shadow-sm"
+                    : "border-slate-200 bg-white hover:border-brand-orange/40"
+                }`}
+              >
+                {selected && (
+                  <span className="absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-brand-orange text-white">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                )}
+                <div className="flex h-12 items-center justify-center">{m.icon}</div>
+                <span className="text-xs font-bold leading-tight text-slate-700">
+                  {m.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
+        {fieldErrors.depositMethod && (
+          <p className="mt-2 text-xs text-red-600">{fieldErrors.depositMethod}</p>
+        )}
       </div>
 
       {/* الموافقة على الشروط */}

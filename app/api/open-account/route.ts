@@ -14,9 +14,8 @@ export async function POST(request: NextRequest) {
 
     const fullName = (form.get("fullName") as string | null)?.trim() ?? "";
     const phone = (form.get("phone") as string | null)?.trim() ?? "";
-    const usdtWallet = (form.get("usdtWallet") as string | null)?.trim() ?? "";
+    const depositMethod = (form.get("depositMethod") as string | null)?.trim() ?? "";
     const idCardFile = form.get("idCard") as File | null;
-    const shamCashFile = form.get("shamCash") as File | null;
 
     // ── التحقق من الخادم ──────────────────────────────────────
     if (!fullName || !phone) {
@@ -33,39 +32,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    for (const [label, file] of [
-      ["صورة الهوية", idCardFile],
-      ["صورة الشام كاش", shamCashFile],
-    ] as [string, File | null][]) {
-      if (!file || file.size === 0) continue;
-      if (!file.type.startsWith(ALLOWED_MIME_PREFIX)) {
-        return NextResponse.json(
-          { ok: false, error: `${label}: يُسمح برفع الصور فقط.` },
-          { status: 400 }
-        );
-      }
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          { ok: false, error: `${label}: الحجم يتجاوز 5MB.` },
-          { status: 400 }
-        );
-      }
+    if (!idCardFile.type.startsWith(ALLOWED_MIME_PREFIX)) {
+      return NextResponse.json(
+        { ok: false, error: "صورة الهوية: يُسمح برفع الصور فقط." },
+        { status: 400 }
+      );
+    }
+    if (idCardFile.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { ok: false, error: "صورة الهوية: الحجم يتجاوز 5MB." },
+        { status: 400 }
+      );
     }
 
-    // ── تحويل الملفات إلى Buffer ──────────────────────────────
+    // ── تحويل الملف إلى Buffer ────────────────────────────────
     const idCardBuffer = Buffer.from(await idCardFile.arrayBuffer());
     const idCardMime = idCardFile.type || "image/jpeg";
     const idCardName = sanitizeFilename(idCardFile.name || "id-card.jpg");
-
-    let shamCashBuffer: Buffer | undefined;
-    let shamCashMime: string | undefined;
-    let shamCashName: string | undefined;
-
-    if (shamCashFile && shamCashFile.size > 0) {
-      shamCashBuffer = Buffer.from(await shamCashFile.arrayBuffer());
-      shamCashMime = shamCashFile.type || "image/jpeg";
-      shamCashName = sanitizeFilename(shamCashFile.name || "sham-cash.jpg");
-    }
 
     const submittedAt = new Date().toLocaleString("ar-SY", {
       timeZone: "Asia/Damascus",
@@ -77,13 +60,10 @@ export async function POST(request: NextRequest) {
     await sendAccountRequestEmail({
       fullName,
       phone,
-      usdtWallet: usdtWallet || undefined,
+      depositMethod,
       idCardBuffer,
       idCardMime,
       idCardName,
-      shamCashBuffer,
-      shamCashMime,
-      shamCashName,
       submittedAt,
     });
 
@@ -93,7 +73,7 @@ export async function POST(request: NextRequest) {
       "",
       `👤 <b>الاسم:</b> ${fullName}`,
       `📱 <b>الهاتف (واتساب):</b> ${phone}`,
-      usdtWallet ? `💼 <b>محفظة USDT:</b> ${usdtWallet}` : "💼 <b>محفظة USDT:</b> —",
+      `💰 <b>طريقة الإيداع:</b> ${depositMethod || "—"}`,
       `📅 <b>التاريخ:</b> ${submittedAt}`,
     ].join("\n");
 
@@ -104,14 +84,6 @@ export async function POST(request: NextRequest) {
       `هوية_${fullName}_${Date.now()}${extFromMime(idCardMime)}`,
       `📄 صورة الهوية — ${fullName}`
     );
-
-    if (shamCashBuffer && shamCashMime && shamCashName) {
-      await sendTelegramDocument(
-        shamCashBuffer,
-        `شام_كاش_${fullName}_${Date.now()}${extFromMime(shamCashMime)}`,
-        `💳 صورة الشام كاش — ${fullName}`
-      );
-    }
 
     return NextResponse.json({ ok: true });
   } catch (err: unknown) {

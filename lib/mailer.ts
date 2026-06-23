@@ -13,13 +13,10 @@ const transporter = nodemailer.createTransport({
 interface AccountRequestData {
   fullName: string;
   phone: string;
-  usdtWallet?: string;
+  depositMethod: string;
   idCardBuffer: Buffer;
   idCardMime: string;
   idCardName: string;
-  shamCashBuffer?: Buffer;
-  shamCashMime?: string;
-  shamCashName?: string;
   submittedAt: string;
 }
 
@@ -31,14 +28,6 @@ export async function sendAccountRequestEmail(data: AccountRequestData) {
       contentType: data.idCardMime,
     },
   ];
-
-  if (data.shamCashBuffer && data.shamCashMime && data.shamCashName) {
-    attachments.push({
-      filename: data.shamCashName,
-      content: data.shamCashBuffer,
-      contentType: data.shamCashMime,
-    });
-  }
 
   const html = `
     <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
@@ -57,16 +46,12 @@ export async function sendAccountRequestEmail(data: AccountRequestData) {
             <td style="padding: 10px 4px; color: #374151;" dir="ltr">${escapeHtml(data.phone)}</td>
           </tr>
           <tr style="border-bottom: 1px solid #f1f5f9;">
-            <td style="padding: 10px 4px; font-weight: bold; color: #252866;">محفظة USDT</td>
-            <td style="padding: 10px 4px; color: #374151;" dir="ltr">${data.usdtWallet ? escapeHtml(data.usdtWallet) : "—"}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #f1f5f9;">
-            <td style="padding: 10px 4px; font-weight: bold; color: #252866;">صورة الهوية</td>
-            <td style="padding: 10px 4px; color: #374151;">مرفقة (انظر المرفقات)</td>
+            <td style="padding: 10px 4px; font-weight: bold; color: #252866;">طريقة الإيداع</td>
+            <td style="padding: 10px 4px; color: #374151;">${data.depositMethod ? escapeHtml(data.depositMethod) : "—"}</td>
           </tr>
           <tr>
-            <td style="padding: 10px 4px; font-weight: bold; color: #252866;">صورة الشام كاش</td>
-            <td style="padding: 10px 4px; color: #374151;">${data.shamCashBuffer ? "مرفقة (انظر المرفقات)" : "—"}</td>
+            <td style="padding: 10px 4px; font-weight: bold; color: #252866;">صورة الهوية</td>
+            <td style="padding: 10px 4px; color: #374151;">مرفقة (انظر المرفقات)</td>
           </tr>
         </table>
         <p style="margin-top: 20px; color: #6b7280; font-size: 12px;">تاريخ الطلب: ${escapeHtml(data.submittedAt)}</p>
