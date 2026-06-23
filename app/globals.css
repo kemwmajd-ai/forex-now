@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-orange: #cf750a;
+  --brand-navy: #252866;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f7f8fc;
+  color: #1f2433;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* شريط تمرير أنيق بألوان الهوية */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #eceef6;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--brand-navy);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-orange);
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-orange px-6 py-3 font-bold text-white shadow-lg shadow-brand-orange/20 transition hover:bg-brand-orange-dark focus:outline-none focus:ring-2 focus:ring-brand-orange/50 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 border-brand-navy px-6 py-3 font-bold text-brand-navy transition hover:bg-brand-navy hover:text-white;
+  }
+  .section-title {
+    @apply text-2xl font-extrabold text-brand-navy sm:text-3xl;
+  }
+}
