@@ -6,7 +6,6 @@ import Link from "next/link";
 interface FormState {
   fullName: string;
   phone: string;
-  usdtWallet: string;
   termsAccepted: boolean;
 }
 
@@ -88,11 +87,67 @@ function FileField({
   );
 }
 
+/** شعار شام كاش (إعادة رسم بألوان العلامة) */
+function ShamCashLogo() {
+  return (
+    <svg width="44" height="44" viewBox="0 0 48 48" aria-label="شام كاش">
+      <polygon points="6,6 42,6 24,24" fill="#2A9BD5" />
+      <polygon points="42,6 42,42 24,24" fill="#6FB544" />
+      <polygon points="6,42 42,42 24,24" fill="#3AAFD6" />
+      <polygon points="6,6 6,42 24,24" fill="#8CC152" />
+      <polygon points="24,17 31,24 24,31 17,24" fill="#fff" />
+    </svg>
+  );
+}
+
+/** أيقونة مراكز الصرافة والحوالات (سهمَا تبادل) */
+function ExchangeIcon() {
+  return (
+    <svg
+      width="42"
+      height="42"
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <g stroke="#252866">
+        <path d="M3 9h15" />
+        <path d="M15 6l3 3-3 3" />
+      </g>
+      <g stroke="#cf750a">
+        <path d="M21 15H6" />
+        <path d="M9 12l-3 3 3 3" />
+      </g>
+    </svg>
+  );
+}
+
+/** أيقونة USDT (تيثر) */
+function UsdtIcon() {
+  return (
+    <svg width="42" height="42" viewBox="0 0 24 24" aria-label="USDT">
+      <circle cx="12" cy="12" r="11" fill="#26A17B" />
+      <text
+        x="12"
+        y="17"
+        textAnchor="middle"
+        fontSize="13"
+        fontWeight="700"
+        fill="#fff"
+        fontFamily="Arial, sans-serif"
+      >
+        ₮
+      </text>
+    </svg>
+  );
+}
+
 export default function OpenAccountForm() {
   const [form, setForm] = useState<FormState>({
     fullName: "",
     phone: "",
-    usdtWallet: "",
     termsAccepted: false,
   });
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -100,9 +155,7 @@ export default function OpenAccountForm() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const idCardRef = useRef<HTMLInputElement>(null);
-  const shamCashRef = useRef<HTMLInputElement>(null);
   const [idCardPreview, setIdCardPreview] = useState<string | null>(null);
-  const [shamCashPreview, setShamCashPreview] = useState<string | null>(null);
 
   function handleFileChange(
     e: React.ChangeEvent<HTMLInputElement>,
@@ -150,11 +203,8 @@ export default function OpenAccountForm() {
     const fd = new FormData();
     fd.append("fullName", form.fullName.trim());
     fd.append("phone", form.phone.trim());
-    if (form.usdtWallet.trim()) fd.append("usdtWallet", form.usdtWallet.trim());
     const idCard = idCardRef.current?.files?.[0];
     if (idCard) fd.append("idCard", idCard);
-    const shamCash = shamCashRef.current?.files?.[0];
-    if (shamCash) fd.append("shamCash", shamCash);
 
     try {
       const res = await fetch("/api/open-account", {
@@ -263,34 +313,39 @@ export default function OpenAccountForm() {
         <p className="-mt-4 text-xs text-red-600">{fieldErrors.idCard}</p>
       )}
 
-      {/* صورة حساب الشام كاش */}
-      <FileField
-        id="shamCash"
-        label="صورة حساب الشام كاش"
-        required={false}
-        fileRef={shamCashRef}
-        preview={shamCashPreview}
-        onFileChange={(e) => handleFileChange(e, setShamCashPreview, "shamCash")}
-      />
-      {fieldErrors.shamCash && (
-        <p className="-mt-4 text-xs text-red-600">{fieldErrors.shamCash}</p>
-      )}
-
-      {/* رقم محفظة USDT */}
-      <div>
-        <label htmlFor="usdtWallet" className="mb-1.5 block text-sm font-bold text-brand-navy">
-          رقم محفظة USDT{" "}
-          <span className="text-xs font-normal text-slate-400">(إن وجد)</span>
-        </label>
-        <input
-          id="usdtWallet"
-          type="text"
-          value={form.usdtWallet}
-          onChange={(e) => setForm((p) => ({ ...p, usdtWallet: e.target.value }))}
-          placeholder="عنوان محفظة USDT (TRC20 / ERC20)"
-          dir="ltr"
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-brand-orange focus:ring-2 focus:ring-brand-orange/40"
-        />
+      {/* طرق الإيداع والسحب المتاحة */}
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <h3 className="mb-1 text-sm font-bold text-brand-navy">
+          طرق الإيداع والسحب المتاحة
+        </h3>
+        <p className="mb-4 text-xs text-slate-500">
+          يمكنك الإيداع والسحب بسهولة عبر إحدى الوسائل التالية:
+        </p>
+        <div className="grid grid-cols-3 gap-3">
+          {/* شام كاش */}
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center">
+            <div className="flex h-12 items-center justify-center">
+              <ShamCashLogo />
+            </div>
+            <span className="text-xs font-bold text-slate-700">شام كاش</span>
+          </div>
+          {/* مراكز الصرافة والحوالات */}
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center">
+            <div className="flex h-12 items-center justify-center">
+              <ExchangeIcon />
+            </div>
+            <span className="text-xs font-bold leading-tight text-slate-700">
+              مراكز الصرافة والحوالات
+            </span>
+          </div>
+          {/* USDT */}
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center">
+            <div className="flex h-12 items-center justify-center">
+              <UsdtIcon />
+            </div>
+            <span className="text-xs font-bold text-slate-700">USDT</span>
+          </div>
+        </div>
       </div>
 
       {/* الموافقة على الشروط */}
