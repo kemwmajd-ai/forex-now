@@ -87,16 +87,15 @@ function FileField({
   );
 }
 
-/** شعار شام كاش (إعادة رسم بألوان العلامة) */
+/** شعار شام كاش الرسمي */
 function ShamCashLogo() {
   return (
-    <svg width="44" height="44" viewBox="0 0 48 48" aria-label="شام كاش">
-      <polygon points="6,6 42,6 24,24" fill="#2A9BD5" />
-      <polygon points="42,6 42,42 24,24" fill="#6FB544" />
-      <polygon points="6,42 42,42 24,24" fill="#3AAFD6" />
-      <polygon points="6,6 6,42 24,24" fill="#8CC152" />
-      <polygon points="24,17 31,24 24,31 17,24" fill="#fff" />
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/sham-cash.png"
+      alt="شام كاش"
+      className="h-11 w-auto object-contain"
+    />
   );
 }
 
