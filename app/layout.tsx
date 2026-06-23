@@ -11,6 +11,7 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://fxnow.pro"),
   title: "فوركس الآن | Forex Now — وساطة مالية",
   description:
     "فوركس الآن | Forex Now — شركة وساطة مالية. افتح حساب تداول، وتابع حركة المؤشرات العالمية وأهم الأخبار الاقتصادية في السوق المالي العالمي.",
