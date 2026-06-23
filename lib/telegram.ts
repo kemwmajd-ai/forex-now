@@ -27,7 +27,7 @@ export async function sendTelegramPhoto(
 ): Promise<void> {
   const form = new FormData();
   form.append("chat_id", process.env.TELEGRAM_CHAT_ID!);
-  form.append("photo", new Blob([photoBuffer]), filename);
+  form.append("photo", new Blob([new Uint8Array(photoBuffer)]), filename);
   if (caption) form.append("caption", caption);
 
   const res = await fetch(botUrl("sendPhoto"), {
@@ -47,7 +47,7 @@ export async function sendTelegramDocument(
 ): Promise<void> {
   const form = new FormData();
   form.append("chat_id", process.env.TELEGRAM_CHAT_ID!);
-  form.append("document", new Blob([fileBuffer]), filename);
+  form.append("document", new Blob([new Uint8Array(fileBuffer)]), filename);
   if (caption) form.append("caption", caption);
 
   const res = await fetch(botUrl("sendDocument"), {

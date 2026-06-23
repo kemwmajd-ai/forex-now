@@ -27,7 +27,7 @@ function FileField({
   id: string;
   label: string;
   required?: boolean;
-  fileRef: React.RefObject<HTMLInputElement>;
+  fileRef: React.RefObject<HTMLInputElement | null>;
   preview: string | null;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
